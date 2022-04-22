@@ -17,8 +17,7 @@ logging.basicConfig(filename=LOGGING_FILE,
 
 class Preprocess:
     def __init__(self):
-        self.normalizer = parsivar.Normalizer(statistical_space_correction=True,
-                                              pinglish_conversion_needed=True)
+        self.normalizer = parsivar.Normalizer(pinglish_conversion_needed=True)
         self.tokenizer = parsivar.Tokenizer()
         self.stemmer = parsivar.FindStems()
         self.stop_words = hazm.stopwords_list()
@@ -101,20 +100,21 @@ def run_preprocess(stemmer, stops_redactor):
     df_processed = df
 
     df_processed['content'] = df['content'].apply(preprocess.normalize)
-    print(df_processed["content"][214])
+    print(df_processed["content"][5239])
 
     df_processed['tokens'] = df_processed['content'].apply(preprocess.tokenize)
-    print(df_processed["tokens"][214])
+    print(df_processed["tokens"][5239])
+    print(len(df_processed["tokens"][5239]))
 
     if stemmer:
         df_processed['tokens'] = df_processed['tokens'].apply(preprocess.stem)
-        print(df_processed["tokens"][214])
-        print(len(df_processed["tokens"][214]))
+        print(df_processed["tokens"][5239])
+        print(len(df_processed["tokens"][5239]))
 
     if stops_redactor:
         df_processed['tokens'] = df_processed['tokens'].apply(preprocess.redact_stops)
-        print(df_processed["tokens"][214])
-        print(len(df_processed["tokens"][214]))
+        print(df_processed["tokens"][5239])
+        print(len(df_processed["tokens"][5239]))
 
     df_processed.to_json(PREPROCESSED_FILE_WSR)
 
