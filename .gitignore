@@ -247,5 +247,8 @@ cython_debug/
 # End of https://www.toptal.com/developers/gitignore/api/pycharm+all,python
 
 data/IR_data_news_12k.json
-data/preprocessed.json
-data/preprocess.log
+data/preprocessed_WSR.json
+data/preprocessed_WSOR.json
+data/positional_indexes_WSR.json
+data/positional_indexes_WOSR.json
+.data/

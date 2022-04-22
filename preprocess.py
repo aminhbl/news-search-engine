@@ -4,7 +4,8 @@ import parsivar
 import hazm
 
 DATA_NEWS_FILE = 'data/IR_data_news_12k.json'
-PREPROCESSED_FILE = 'data/preprocessed.json'
+PREPROCESSED_FILE_WSR = 'data/preprocessed_WSR.json'
+PREPROCESSED_FILE_WOSR = 'data/preprocessed_WOSR.json'
 LOGGING_FILE = 'data/preprocess.log'
 
 logging.basicConfig(filename=LOGGING_FILE,
@@ -115,7 +116,7 @@ def run_preprocess(stemmer, stops_redactor):
         print(df_processed["tokens"][214])
         print(len(df_processed["tokens"][214]))
 
-    df_processed.to_json(PREPROCESSED_FILE)
+    df_processed.to_json(PREPROCESSED_FILE_WSR)
 
 
 def main():
