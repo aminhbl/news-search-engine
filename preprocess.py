@@ -50,29 +50,13 @@ class Preprocess:
         for token, positions in tokens.items():
             stem_tokens = self.stemmer.convert_to_stem(token)
 
-            if "&" in stem_tokens:
-                past_form, present_form = stem_tokens.split("&")
-                # self.logger.info('Stemmer: {} -> {}, {}'.format(token, past_form, present_form))
+            self.logger.info('Stemmer: {} -> {}'.format(token, stem_tokens))
 
-                for i in range(len(positions)):
-                    try:
-                        stem_tokens_indexed[past_form].append(positions[i])
-                    except KeyError:
-                        stem_tokens_indexed[past_form] = [positions[i]]
-
-                    try:
-                        stem_tokens_indexed[present_form].append(positions[i])
-                    except KeyError:
-                        stem_tokens_indexed[present_form] = [positions[i]]
-
-            else:
-                self.logger.info('Stemmer: {} -> {}'.format(token, stem_tokens))
-
-                for i in range(len(positions)):
-                    try:
-                        stem_tokens_indexed[stem_tokens].append(positions[i])
-                    except KeyError:
-                        stem_tokens_indexed[stem_tokens] = [positions[i]]
+            for i in range(len(positions)):
+                try:
+                    stem_tokens_indexed[stem_tokens].append(positions[i])
+                except KeyError:
+                    stem_tokens_indexed[stem_tokens] = [positions[i]]
 
         return stem_tokens_indexed
 
