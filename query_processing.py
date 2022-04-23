@@ -8,7 +8,7 @@ def query(query_content):
 
     positional_indexing = positional_indexing.load_positional_indexind(WSR=True)
 
-    query_preprocessed, query_list = preprocessor.query_preprocess(query=query_content)
+    query_preprocessed, tokens = preprocessor.query_preprocess(query=query_content)
     query_quoted = {}
     query_not = {}
 
@@ -42,10 +42,22 @@ def query(query_content):
         del query_preprocessed[key]
     query_noraml = query_preprocessed
 
+    query_quotations = [[] for _ in range((query_content.count('\"') // 2))]
+    quotations_seen = False
+    quote_number = 0
+    for t in tokens:
+        if t == "\"":
+            quotations_seen = not quotations_seen
+            if not quotations_seen:
+                quote_number += 1
+            continue
+        if quotations_seen:
+            query_quotations[quote_number].append(t)
+
     print(query_quoted)
     print(query_not)
     print(query_noraml)
-    print(query_list)
+    print(query_quotations)
 
     answers = {}
 
@@ -54,46 +66,69 @@ def query(query_content):
             freq = positional_indexing[query_token][0]
             doc_n_positions = positional_indexing[query_token][1]
 
-            if len(answers) > 0:
-                shared_docs = answers.keys() & doc_n_positions.keys()
-                # answers = {k: answers[k] for k in shared_docs}
-                for doc in shared_docs:
+            for doc in doc_n_positions:
+                if doc in answers:
                     answers[doc] += 1
-                # doc_n_positions = {k: doc_n_positions[k] for k in shared_docs}
-
-            else:
-                for doc in doc_n_positions:
+                else:
                     answers[doc] = 1
 
-    for i in range(0, len(query_list)):
-        if query_list[i] in query_quoted and query_list[i] in positional_indexing:
-            freq_1 = positional_indexing[query_list[i]][0]
-            doc_n_positions_1 = positional_indexing[query_list[i]][1]
+    for quotation_list in query_quotations:
+        query_quote_token = quotation_list[0]
+        if query_quote_token in positional_indexing:
+            freq_1 = positional_indexing[query_quote_token][0]
+            doc_n_positions_1 = positional_indexing[query_quote_token][1]
 
-            for j in range(i + 1, len(query_list)):
-                if query_list[j] in query_quoted and query_list[j] in positional_indexing:
-                    freq_2 = positional_indexing[query_list[j]][0]
-                    doc_n_positions_2 = positional_indexing[query_list[j]][1]
+            if len(answers) > 0:
+                shared_docs = answers.keys() & doc_n_positions_1.keys()
+                answers = {k: answers[k] for k in shared_docs}
 
-                    if len(answers) > 0:
-                        shared_docs = answers.keys() & doc_n_positions_2.keys()
-                        answers = {k: answers[k] for k in shared_docs}
-                        doc_n_positions_2 = {k: doc_n_positions_2[k] for k in shared_docs}
+                if len(answers) == 0:
+                    break
+
+            for doc in doc_n_positions_1:
+                if doc in answers:
+                    answers[doc] += 1
+                else:
+                    answers[doc] = 1
+
+            print(len(answers))
+            print(answers)
+
+            for j in range(1, len(quotation_list)):
+                if quotation_list[j] in positional_indexing:
+                    freq_2 = positional_indexing[quotation_list[j]][0]
+                    doc_n_positions_2 = positional_indexing[quotation_list[j]][1]
 
                     #  possible check for shortest dict
+                    shared = {}
                     for doc1 in doc_n_positions_1:
                         if doc1 in doc_n_positions_2:
                             positions1 = doc_n_positions_1[doc1]
                             positions2 = doc_n_positions_2[doc1]
                             for p1 in positions1:
                                 for p2 in positions2:
-                                    if p1 > p2:
-                                        break
-                                    if abs(p1 - p2) == abs(i - j):
+                                    if p2 - p1 == j:
+
+                                        shared[doc1] = 1
+
                                         if doc1 in answers:
                                             answers[doc1] += 1
-                                        else:
-                                            answers[doc1] = 1
+                                        # else:
+                                        #     answers[doc1] = 1
+
+                    if len(answers) > 0:
+                        shared_docs = answers.keys() & shared.keys()
+                        answers = {k: answers[k] for k in shared_docs}
+
+                        print(len(answers))
+                        print(answers)
+                        if len(answers) == 0:
+                            # todo:break
+                            break
+
+    answers = dict(sorted(answers.items(), key=lambda item: item[1], reverse=True))
+    print(len(answers))
+    print(answers)
 
 
 if __name__ == '__main__':
