@@ -24,7 +24,7 @@ class Preprocess:
         self.to_remove = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹',
                           '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                           '(', ')', '[', ']', '«', '»', '<<', '>>', '{', '}',
-                          "!", '?', '،', '.', ':', '-', '_', '/', '=', '؛', '&', "%", "#", "*",
+                          '?', '،', '.', ':', '-', '_', '/', '=', '؛', '&', "%", "#", "*",
                           'https://', 'http://', 'انتهای پیام', '://']
 
         self.logger = logging.getLogger()
@@ -75,6 +75,13 @@ class Preprocess:
 
         return tokens
 
+    def query_preprocess(self, query):
+        query_normalized = self.normalize(query)
+        query_tokenized = self.tokenize(query_normalized)
+        query_stemmed = self.stem(query_tokenized)
+        query_stops_redacted = self.redact_stops(query_stemmed)
+        return query_stops_redacted
+
 
 def run_preprocess(stemmer, stops_redactor):
     preprocess = Preprocess()
@@ -107,4 +114,4 @@ def main():
     run_preprocess(True, True)
 
 
-main()
+# main()

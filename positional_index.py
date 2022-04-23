@@ -32,6 +32,15 @@ class PositionalIndexing:
         with open(self.POSITIONAL_INDEXED_FILE_WSR, 'w') as fp:
             json.dump(self.positional_index, fp, sort_keys=True, indent=4)
 
+    def load_positional_indexind(self, WSR):
+
+        if WSR:
+            with open(self.POSITIONAL_INDEXED_FILE_WSR, 'r') as fp:
+                return json.load(fp)
+        else:
+            with open(self.POSITIONAL_INDEXED_FILE_WOSR, 'r') as fp:
+                return json.load(fp)
+
     def fit_preprocessed_data(self, WSR):
 
         if WSR:
@@ -47,4 +56,4 @@ def main():
     positional_indexing.store_positional_indexind()
 
 
-main()
+# main()
