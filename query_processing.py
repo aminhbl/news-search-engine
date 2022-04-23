@@ -54,10 +54,10 @@ def query(query_content):
         if quotations_seen:
             query_quotations[quote_number].append(t)
 
-    print(query_quoted)
-    print(query_not)
-    print(query_noraml)
-    print(query_quotations)
+    # print(query_quoted)
+    # print(query_not)
+    # print(query_noraml)
+    # print(query_quotations)
 
     answers = {}
 
@@ -67,10 +67,14 @@ def query(query_content):
             doc_n_positions = positional_indexing[query_token][1]
 
             for doc in doc_n_positions:
-                if doc in answers:
-                    answers[doc] += 1
-                else:
-                    answers[doc] = 1
+                for _ in doc_n_positions[doc]:
+                    if doc in answers:
+                        if query_token in answers[doc]:
+                            answers[doc][query_token] += 1
+                        else:
+                            answers[doc][query_token] = 1
+                    else:
+                        answers[doc] = {query_token: 1}
 
     for quotation_list in query_quotations:
         query_quote_token = quotation_list[0]
@@ -78,28 +82,26 @@ def query(query_content):
             freq_1 = positional_indexing[query_quote_token][0]
             doc_n_positions_1 = positional_indexing[query_quote_token][1]
 
-            if len(answers) > 0:
-                shared_docs = answers.keys() & doc_n_positions_1.keys()
-                answers = {k: answers[k] for k in shared_docs}
+            if len(quotation_list) == 1:
 
-                if len(answers) == 0:
-                    break
-
-            for doc in doc_n_positions_1:
-                if doc in answers:
-                    answers[doc] += 1
-                else:
-                    answers[doc] = 1
-
-            print(len(answers))
-            print(answers)
+                if len(answers) > 0:
+                    shared_docs = answers.keys() & doc_n_positions_1.keys()
+                    answers = {k: answers[k] for k in shared_docs}
+                    print(answers)
+                for doc in doc_n_positions_1:
+                    if doc in answers:
+                        if str(quotation_list) in answers[doc]:
+                            answers[doc][str(quotation_list)] += 1
+                        else:
+                            answers[doc][str(quotation_list)] = 1
+                    else:
+                        answers[doc] = {str(quotation_list): 1}
 
             for j in range(1, len(quotation_list)):
                 if quotation_list[j] in positional_indexing:
                     freq_2 = positional_indexing[quotation_list[j]][0]
                     doc_n_positions_2 = positional_indexing[quotation_list[j]][1]
 
-                    #  possible check for shortest dict
                     shared = {}
                     for doc1 in doc_n_positions_1:
                         if doc1 in doc_n_positions_2:
@@ -111,10 +113,14 @@ def query(query_content):
 
                                         shared[doc1] = 1
 
-                                        if doc1 in answers:
-                                            answers[doc1] += 1
-                                        # else:
-                                        #     answers[doc1] = 1
+                                        if j == len(quotation_list) - 1:
+                                            if doc1 in answers:
+                                                if str(quotation_list) in answers[doc1]:
+                                                    answers[doc1][str(quotation_list)] += 1
+                                                else:
+                                                    answers[doc1][str(quotation_list)] = 1
+                                            else:
+                                                answers[doc1] = {str(quotation_list): 1}
 
                     if len(answers) > 0:
                         shared_docs = answers.keys() & shared.keys()
@@ -123,12 +129,14 @@ def query(query_content):
                         print(len(answers))
                         print(answers)
                         if len(answers) == 0:
-                            # todo:break
                             break
+        else:
+            answers = {}
 
-    answers = dict(sorted(answers.items(), key=lambda item: item[1], reverse=True))
-    print(len(answers))
-    print(answers)
+    answers = dict(sorted(answers.items(), key=lambda item: sum(item[1].values()), reverse=True))
+    print('Total Documents: {}'.format(len(answers)))
+    for k, v in answers.items():
+        print('Doc: {} | {}'.format(k, v))
 
 
 if __name__ == '__main__':
