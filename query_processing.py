@@ -61,6 +61,7 @@ def query(query_content):
 
     answers = {}
 
+    # Words
     for query_token in query_noraml:
         if query_token in positional_indexing:
             freq = positional_indexing[query_token][0]
@@ -76,6 +77,7 @@ def query(query_content):
                     else:
                         answers[doc] = {query_token: 1}
 
+    # Phrase
     for quotation_list in query_quotations:
         query_quote_token = quotation_list[0]
         if query_quote_token in positional_indexing:
@@ -132,6 +134,16 @@ def query(query_content):
                             break
         else:
             answers = {}
+
+    # NOT
+    for query_token in query_not:
+        if query_token in positional_indexing:
+            freq = positional_indexing[query_token][0]
+            doc_n_positions = positional_indexing[query_token][1]
+
+            for doc in doc_n_positions:
+                if doc in answers:
+                    del answers[doc]
 
     answers = dict(sorted(answers.items(), key=lambda item: sum(item[1].values()), reverse=True))
     print('Total Documents: {}'.format(len(answers)))
