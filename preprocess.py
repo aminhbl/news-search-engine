@@ -50,7 +50,7 @@ class Preprocess:
         for token, positions in tokens.items():
             stem_tokens = self.stemmer.convert_to_stem(token)
 
-            self.logger.info('Stemmer: {} -> {}'.format(token, stem_tokens))
+            # self.logger.info('Stemmer: {} -> {}'.format(token, stem_tokens))
 
             for i in range(len(positions)):
                 try:
@@ -112,11 +112,11 @@ def run_preprocess(stemmer, stops_redactor):
         print(df_processed["tokens"][5239])
         print(len(df_processed["tokens"][5239]))
 
-    df_processed.to_json(PREPROCESSED_FILE_WSR)
+    return df_processed
 
 
 def main():
-    run_preprocess(True, True)
-
+    df_processed = run_preprocess(True, True)
+    df_processed.to_json(PREPROCESSED_FILE_WSR)
 
 # main()

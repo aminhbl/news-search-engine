@@ -1,5 +1,7 @@
-from preprocess import Preprocess
 from positional_index import PositionalIndexing
+from preprocess import Preprocess
+from preprocess import DATA_NEWS_FILE
+import pandas as pd
 
 
 def query(query_content):
@@ -7,6 +9,7 @@ def query(query_content):
     positional_indexing = PositionalIndexing()
 
     positional_indexing = positional_indexing.load_positional_indexind(WSR=True)
+    df = pd.read_json(DATA_NEWS_FILE, orient='index')
 
     query_preprocessed, tokens = preprocessor.query_preprocess(query=query_content)
     query_quoted = {}
@@ -89,7 +92,7 @@ def query(query_content):
                 if len(answers) > 0:
                     shared_docs = answers.keys() & doc_n_positions_1.keys()
                     answers = {k: answers[k] for k in shared_docs}
-                    print(answers)
+
                 for doc in doc_n_positions_1:
                     if doc in answers:
                         if str(quotation_list) in answers[doc]:
@@ -128,10 +131,10 @@ def query(query_content):
                         shared_docs = answers.keys() & shared.keys()
                         answers = {k: answers[k] for k in shared_docs}
 
-                        print(len(answers))
-                        print(answers)
                         if len(answers) == 0:
                             break
+                else:
+                    answers = {}
         else:
             answers = {}
 
@@ -146,9 +149,37 @@ def query(query_content):
                     del answers[doc]
 
     answers = dict(sorted(answers.items(), key=lambda item: sum(item[1].values()), reverse=True))
-    print('Total Documents: {}'.format(len(answers)))
-    for k, v in answers.items():
-        print('Doc: {} | {}'.format(k, v))
+    print('\nTotal Retrieved Documents: {}\n'.format(len(answers)))
+
+    total_retrived_tokens = {}
+    for doc, tokens in answers.items():
+        for token, score in tokens.items():
+            total_retrived_tokens[token] = total_retrived_tokens.get(token, 0) + score
+
+    ranked_docs = {}
+    for doc, tokens in answers.items():
+        sum_score = sum(total_retrived_tokens.values())
+        for token in total_retrived_tokens:
+            if token in tokens:
+                if doc in ranked_docs:
+                    ranked_docs[doc] *= (tokens[token] / total_retrived_tokens[token])
+                else:
+                    ranked_docs[doc] = (tokens[token] / total_retrived_tokens[token])
+            else:
+                ranked_docs[doc] = 0
+
+        # if doc in ranked_docs:
+        #     ranked_docs[doc] /= sum_score
+
+    ranked_docs = dict(sorted(ranked_docs.items(), key=lambda item: item[1], reverse=True))
+
+    for k, v in ranked_docs.items():
+        print('Doc ID: {}'.format(k))
+        # print(v)
+        print(answers[k])
+        print('Title: {}'.format(df.iloc[int(k)].title))
+        print('URL: {}'.format(df.iloc[int(k)].url))
+        print()
 
 
 if __name__ == '__main__':
