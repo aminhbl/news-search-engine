@@ -36,6 +36,38 @@ class Preprocess:
         sentence = sentence.replace("انتهای پیام", "")
         tokens = self.tokenizer.tokenize_words(sentence)
 
+        # tokens_indexed = {}
+        # for pos in range(len(tokens)):
+        #     try:
+        #         tokens_indexed[tokens[pos]].append(pos)
+        #     except KeyError:
+        #         tokens_indexed[tokens[pos]] = [pos]
+
+        return tokens
+
+    def stem(self, tokens):
+        stem_tokens_indexed = []
+        for token in tokens:
+            stem_tokens = self.stemmer.convert_to_stem(token)
+
+            # self.logger.info('Stemmer: {} -> {}'.format(token, stem_tokens))
+
+            stem_tokens_indexed.append(stem_tokens)
+
+        return stem_tokens_indexed
+
+    def redact_stops(self, tokens):
+        temp = set(self.stop_words)
+        to_redact1 = [_ for _ in tokens if _ in temp]
+
+        temp2 = set(self.to_remove)
+        to_redact2 = [_ for _ in tokens if _ in temp2]
+
+        to_redact = to_redact1 + to_redact2
+        self.logger.info('Stop Tokens: {} '.format(to_redact))
+
+        tokens = list(filter(lambda k: k not in to_redact, tokens))
+
         tokens_indexed = {}
         for pos in range(len(tokens)):
             try:
@@ -45,36 +77,6 @@ class Preprocess:
 
         return tokens_indexed
 
-    def stem(self, tokens):
-        stem_tokens_indexed = {}
-        for token, positions in tokens.items():
-            stem_tokens = self.stemmer.convert_to_stem(token)
-
-            # self.logger.info('Stemmer: {} -> {}'.format(token, stem_tokens))
-
-            for i in range(len(positions)):
-                try:
-                    stem_tokens_indexed[stem_tokens].append(positions[i])
-                except KeyError:
-                    stem_tokens_indexed[stem_tokens] = [positions[i]]
-
-        return stem_tokens_indexed
-
-    def redact_stops(self, tokens):
-        temp = set(self.stop_words)
-        to_redact1 = [_ for _ in list(tokens) if _ in temp]
-
-        temp2 = set(self.to_remove)
-        to_redact2 = [_ for _ in list(tokens) if _ in temp2]
-
-        to_redact = to_redact1 + to_redact2
-        self.logger.info('Stop Tokens: {} '.format(to_redact))
-
-        for word in to_redact:
-            del tokens[word]
-
-        return tokens
-
     def query_preprocess(self, query):
         query_normalized = self.normalize(query)
         query_tokenized = self.tokenize(query_normalized)
@@ -83,7 +85,17 @@ class Preprocess:
 
         query = self.tokenizer.tokenize_words(query_normalized)
         map(self.stemmer.convert_to_stem, query)
-        map(self.redact_stops, query)
+
+        temp = set(self.stop_words)
+        to_redact1 = [_ for _ in query if _ in temp]
+
+        temp2 = set(self.to_remove)
+        to_redact2 = [_ for _ in query if _ in temp2]
+
+        to_redact = to_redact1 + to_redact2
+        self.logger.info('Stop Tokens: {} '.format(to_redact))
+
+        query = list(filter(lambda k: k not in to_redact, query))
 
         return query_stops_redacted, query
 

@@ -135,8 +135,10 @@ def query(query_content):
                             break
                 else:
                     answers = {}
+                    break
         else:
             answers = {}
+            break
 
     # NOT
     for query_token in query_not:
@@ -176,7 +178,7 @@ def query(query_content):
     for k, v in ranked_docs.items():
         print('Doc ID: {}'.format(k))
         # print(v)
-        print(answers[k])
+        # print(answers[k])
         print('Title: {}'.format(df.iloc[int(k)].title))
         print('URL: {}'.format(df.iloc[int(k)].url))
         print()
