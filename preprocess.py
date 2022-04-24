@@ -64,7 +64,7 @@ class Preprocess:
         to_redact2 = [_ for _ in tokens if _ in temp2]
 
         to_redact = to_redact1 + to_redact2
-        self.logger.info('Stop Tokens: {} '.format(to_redact))
+        # self.logger.info('Stop Tokens: {} '.format(to_redact))
 
         tokens = list(filter(lambda k: k not in to_redact, tokens))
 
@@ -93,7 +93,7 @@ class Preprocess:
         to_redact2 = [_ for _ in query if _ in temp2]
 
         to_redact = to_redact1 + to_redact2
-        self.logger.info('Stop Tokens: {} '.format(to_redact))
+        # self.logger.info('Stop Tokens: {} '.format(to_redact))
 
         query = list(filter(lambda k: k not in to_redact, query))
 
@@ -108,21 +108,21 @@ def run_preprocess(stemmer, stops_redactor):
     df_processed = df
 
     df_processed['content'] = df['content'].apply(preprocess.normalize)
-    print(df_processed["content"][5239])
+    # print(df_processed["content"][5239])
 
     df_processed['tokens'] = df_processed['content'].apply(preprocess.tokenize)
-    print(df_processed["tokens"][5239])
-    print(len(df_processed["tokens"][5239]))
+    # print(df_processed["tokens"][5239])
+    # print(len(df_processed["tokens"][5239]))
 
     if stemmer:
         df_processed['tokens'] = df_processed['tokens'].apply(preprocess.stem)
-        print(df_processed["tokens"][5239])
-        print(len(df_processed["tokens"][5239]))
+        # print(df_processed["tokens"][5239])
+        # print(len(df_processed["tokens"][5239]))
 
     if stops_redactor:
         df_processed['tokens'] = df_processed['tokens'].apply(preprocess.redact_stops)
-        print(df_processed["tokens"][5239])
-        print(len(df_processed["tokens"][5239]))
+        # print(df_processed["tokens"][5239])
+        # print(len(df_processed["tokens"][5239]))
 
     return df_processed
 
@@ -131,4 +131,16 @@ def main():
     df_processed = run_preprocess(True, True)
     df_processed.to_json(PREPROCESSED_FILE_WSR)
 
-# main()
+
+if __name__ == '__main__':
+    main()
+    # sentence = "آیا امشب این تیم می تواند به مرحله بعدی جام حذفی فوتبال انگلیس راه پیدا کند"
+    # preprocess = Preprocess()
+    # query_normalized = preprocess.normalize(sentence)
+    # print(query_normalized)
+    # query_tokenized = preprocess.tokenize(query_normalized)
+    # print(query_tokenized)
+    # query_stemmed = preprocess.stem(query_tokenized)
+    # print(query_stemmed)
+    # query_stops_redacted = preprocess.redact_stops(query_stemmed)
+    # print(query_stops_redacted)

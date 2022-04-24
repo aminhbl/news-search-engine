@@ -56,4 +56,5 @@ def main():
     positional_indexing.store_positional_indexind()
 
 
-# main()
+if __name__ == '__main__':
+    main()
