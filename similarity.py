@@ -34,9 +34,9 @@ def query_processing(query_content):
 
     docID_score = dict(sorted(docID_score.items(), key=lambda item: item[1], reverse=True))
     # print(docID_score)
-
     top_docs = dict(itertools.islice(docID_score.items(), K))
 
+    print('\nTop 10 documents:')
     df = pd.read_json(DATA_NEWS_FILE, orient='index')
     for doc in top_docs:
         print('Doc ID: {}'.format(doc))

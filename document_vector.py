@@ -90,10 +90,13 @@ class Vector:
         for token, positions in query_preprocessed.items():
             raw_tf = len(positions)
             tf = 1 + math.log10(raw_tf)
-            df = len(self.positional_indexing[token][1])
-            idf = math.log10(self.numner_of_documents / df)
-            length += (tf * idf) ** 2
-            tf_idf[token] = tf * idf
+            try:
+                df = len(self.positional_indexing[token][1])
+                idf = math.log10(self.numner_of_documents / df)
+                length += (tf * idf) ** 2
+                tf_idf[token] = tf * idf
+            except KeyError:
+                idf = 0
         length = length ** 0.5
 
         for token, w in tf_idf.items():
