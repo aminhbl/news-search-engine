@@ -83,8 +83,9 @@ class Preprocess:
         query_stemmed = self.stem(query_tokenized)
         query_stops_redacted = self.redact_stops(query_stemmed)
 
-        query = self.tokenizer.tokenize_words(query_normalized)
-        map(self.stemmer.convert_to_stem, query)
+        # query = self.tokenizer.tokenize_words(query_normalized)
+        # map(self.stemmer.convert_to_stem, query)
+        query = query_stemmed
 
         temp = set(self.stop_words)
         to_redact1 = [_ for _ in query if _ in temp]
