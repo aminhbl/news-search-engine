@@ -4,16 +4,17 @@ import pandas as pd
 import math
 import json
 
-
 DATA_NEWS_FILE = 'data/IR_data_news_12k.json'
 POSITIONAL_INDEXED_FILE_WSR = 'data/positional_indexes_WSR.json'
 CHAMPION_LIST_FILE = 'data/chamption_list.json'
 DOC2VEC_FILE = 'data/document_vector.json'
+DOC2VEC_FILE_TAAT = 'data/document_vector_TAAT.json'
 
 
 class Vector:
     def __init__(self):
         self.document_vectors = {}
+        self.term_vectors = {}
         self.query_vector = {}
         self.champion_list = {}
 
@@ -39,6 +40,23 @@ class Vector:
             length = length ** 0.5
             self.document_vectors[docID] = {k: v / length for k, v in tf.items()}
 
+    def create_doc2vec_TAAT(self):
+        df = pd.read_json(DATA_NEWS_FILE, orient='index')
+        self.numner_of_documents = df.shape[0]
+
+        positional_indexing_class = PositionalIndexing()
+        self.positional_indexing = positional_indexing_class.load_positional_indexind(WSR=True)
+
+        for term in self.positional_indexing:
+            nt = len(self.positional_indexing[term][1])
+
+            for doc in self.positional_indexing[term][1]:
+                positions = self.positional_indexing[term][1][doc]
+                tf = 1 + math.log10(len(positions))
+                idf = math.log10(self.numner_of_documents / nt)
+                tfidf = tf * idf
+                self.term_vectors[term][doc] = tfidf
+
     def store_doc2vec(self):
         with open(DOC2VEC_FILE, 'w', encoding='utf-8') as fp:
             json.dump(self.document_vectors, fp, sort_keys=True, indent=4, ensure_ascii=False)
@@ -46,6 +64,14 @@ class Vector:
     def load_doc2vec(self):
         with open(DOC2VEC_FILE, 'r', encoding='utf-8') as fp:
             self.document_vectors = json.load(fp)
+
+    def store_doc2vec_TAAT(self):
+        with open(DOC2VEC_FILE_TAAT, 'w', encoding='utf-8') as fp:
+            json.dump(self.term_vectors, fp, sort_keys=True, indent=4, ensure_ascii=False)
+
+    def load_doc2vec_TAAT(self):
+        with open(DOC2VEC_FILE_TAAT, 'r', encoding='utf-8') as fp:
+            self.term_vectors = json.load(fp)
 
     def query2vec(self, query_content):
         if self.numner_of_documents is None:
@@ -72,6 +98,24 @@ class Vector:
 
         for token, w in tf_idf.items():
             self.query_vector[token] = w / length
+
+    def query2vec_TAAT(self, query_content):
+        if self.numner_of_documents is None:
+            df = pd.read_json(DATA_NEWS_FILE, orient='index')
+            self.numner_of_documents = df.shape[0]
+
+        if self.positional_indexing is None:
+            positional_indexing_class = PositionalIndexing()
+            self.positional_indexing = positional_indexing_class.load_positional_indexind(WSR=True)
+
+        preprocessor = Preprocess()
+        query_preprocessed, _ = preprocessor.query_preprocess(query=query_content)
+
+        for token, positions in query_preprocessed.items():
+            tf = 1 + math.log10(len(positions))
+            idf = math.log10(self.numner_of_documents / 1)
+            tfidf = tf * idf
+            self.query_vector[token] = tfidf
 
     def create_champion_list(self):
         if self.positional_indexing is None:
