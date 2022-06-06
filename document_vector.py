@@ -31,7 +31,7 @@ class Vector:
             tf = {}
             length = 0
             for term in self.positional_indexing:
-                if docID in self.positional_indexing[term][1]:
+                if str(docID) in self.positional_indexing[term][1]:
                     raw_tf = len(self.positional_indexing[term][1][str(docID)])
                     tf_value = 1 + math.log10(raw_tf)
                     length += tf_value ** 2

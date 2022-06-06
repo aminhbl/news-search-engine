@@ -251,4 +251,6 @@ data/preprocessed_WSR.json
 data/preprocessed_WSOR.json
 data/positional_indexes_WSR.json
 data/positional_indexes_WOSR.json
+data/chamption_list.json
+data/document_vector.json
 .data/
